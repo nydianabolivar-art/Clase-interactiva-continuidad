@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab Continuidad Pro v2.0 FINAL - Herramienta Completa</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #028090;
+      --secondary: #00A896;
+      --accent: #02C39A;
+      --dark: #1F3647;
+      --light: #F5F6F7;
+      --success: #27AE60;
+      --danger: #E74C3C;
+      --warning: #F39C12;
+      --info: #3498DB;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--light) 0%, #E8F4F8 100%);
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 40px 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(2, 128, 144, 0.3);
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.8em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 1.1em;
+      opacity: 0.95;
+    }
+
+    .tabs-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: white;
+      color: var(--dark);
+      border: 2px solid var(--light);
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1em;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .tab-btn:hover:not(.active) {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border-top: 4px solid var(--primary);
+    }
+
+    .card h2 {
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-size: 1.6em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 0.95em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    select, input[type="text"], input[type="range"], input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid var(--light);
+      border-radius: 6px;
+      font-size: 0.95em;
+      transition: border-color 0.3s;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(2, 128, 144, 0.1);
+    }
+
+    input[type="range"] {
+      height: 6px;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .slider-value {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.9em;
+      margin-left: 10px;
+    }
+
+    .help-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: var(--info);
+      color: white;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: help;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .help-icon:hover {
+      background: var(--primary);
+      transform: scale(1.15);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 400px;
+      margin: 20px 0;
+    }
+
+    button {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 128, 144, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      animation: fadeIn 0.3s;
+      overflow-y: auto;
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 30px;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      max-width: 750px;
+      width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-header {
+      font-size: 1.8em;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 20px;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .close-modal {
+      font-size: 32px;
+      font-weight: bold;
+      color: var(--primary);
+      cursor: pointer;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    .close-modal:hover {
+      color: var(--secondary);
+    }
+
+    .modal-body {
+      font-size: 0.95em;
+      color: var(--dark);
+      line-height: 1.8;
+    }
+
+    .modal-body h3 {
+      color: var(--secondary);
+      margin-top: 25px;
+      margin-bottom: 12px;
+      font-size: 1.15em;
+    }
+
+    .info-box {
+      background: linear-gradient(135deg, #F0F8FF 0%, #E8F4F8 100%);
+      border-left: 4px solid var(--primary);
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      font-size: 0.95em;
+    }
+
+    .info-box.success {
+      background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+      border-left-color: var(--success);
+    }
+
+    .info-box.danger {
+      background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+      border-left-color: var(--danger);
+    }
+
+    .info-box.warning {
+      background: linear-gradient(135deg, #FFF5E1 0%, #FFE8CC 100%);
+      border-left-color: var(--warning);
+    }
+
+    .continuity-check {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--light);
+      border-radius: 6px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      margin: 15px 0;
+      padding: 12px;
+      background: white;
+      border-radius: 6px;
+    }
+
+    .check-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin-right: 12px;
+      font-weight: bold;
+      color: white;
+      font-size: 0.85em;
+      flex-shrink: 0;
+    }
+
+    .check-icon.yes {
+      background: var(--success);
+    }
+
+    .check-icon.no {
+      background: var(--danger);
+    }
+
+    .check-label {
+      flex: 1;
+    }
+
+    .check-label strong {
+      color: var(--primary);
+    }
+
+    .glossary-item {
+      background: var(--light);
+      padding: 15px;
+      margin: 12px 0;
+      border-radius: 6px;
+      border-left: 4px solid var(--secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .glossary-item:hover {
+      background: #e0f2f1;
+      transform: translateX(5px);
+    }
+
+    .glossary-term {
+      font-weight: 700;
+      color: var(--secondary);
+      font-size: 1.05em;
+      margin-bottom: 6px;
+    }
+
+    .glossary-definition {
+      font-size: 0.95em;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+
+    .glossary-example {
+      font-size: 0.85em;
+      color: #666;
+      font-style: italic;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #ddd;
+    }
+
+    .animation-container {
+      background: linear-gradient(135deg, #E8F4F8 0%, #F5F6F7 100%);
+      padding: 40px 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+      position: relative;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .animation-stage {
+      position: relative;
+      height: 100px;
+      margin: 20px 0;
+    }
+
+    .animation-arrow {
+      display: inline-block;
+      position: absolute;
+      font-size: 1.8em;
+    }
+
+    .animation-arrow.left {
+      left: 0;
+      animation: approachLeft 4s infinite;
+    }
+
+    .animation-arrow.right {
+      right: 0;
+      animation: approachRight 4s infinite;
+    }
+
+    .animation-point {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5em;
+    }
+
+    @keyframes approachLeft {
+      0% { left: 0; opacity: 0; }
+      5% { opacity: 1; }
+      80% { opacity: 1; }
+      85% { left: calc(50% - 50px); }
+      100% { left: calc(50% - 40px); opacity: 0; }
+    }
+
+    @keyframes approachRight {
+      0% { right: 0; opacity: 0; }
+      5% { opacity: 1; }
+      80% { opacity: 1; }
+      85% { right: calc(50% - 50px); }
+      100% { right: calc(50% - 40px); opacity: 0; }
+    }
+
+    .animation-controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .animation-btn {
+      padding: 10px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .animation-btn:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+
+    .animation-btn.paused {
+      background: var(--warning);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comparison-card {
+      background: var(--light);
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 5px solid var(--secondary);
+    }
+
+    .comparison-card.jump {
+      border-left-color: var(--danger);
+    }
+
+    .comparison-title {
+      font-weight: 700;
+      font-size: 1.15em;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+
+    .comparison-item {
+      margin: 12px 0;
+      font-size: 0.95em;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+    }
+
+    .comparison-item strong {
+      color: var(--secondary);
+    }
+
+    .substitution-steps {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 5px solid var(--accent);
+    }
+
+    .step {
+      margin: 15px 0;
+      padding: 12px;
+      background: var(--light);
+      border-radius: 6px;
+      border-left: 3px solid var(--secondary);
+      font-family: 'Courier New', monospace;
+      font-size: 0.95em;
+    }
+
+    .step-label {
+      font-weight: 600;
+      color: var(--primary);
+      margin-right: 10px;
+      display: inline-block;
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      margin-right: 10px;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    .tutorial-step-counter {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      font-size: 0.85em;
+      color: #999;
+    }
+
+    .tutorial-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .tutorial-buttons button {
+      flex: 1;
+      padding: 12px;
+    }
+
+    .tutorial-buttons button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .formula {
+      background: var(--light);
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      margin: 12px 0;
+      overflow-x: auto;
+      border-left: 3px solid var(--accent);
+      font-size: 0.95em;
+    }
+
+    .error-message {
+      background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+      border-left: 4px solid var(--danger);
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 10px;
+      color: var(--danger);
+      font-size: 0.95em;
+    }
+
+    .success-message {
+      background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+      border-left: 4px solid var(--success);
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 10px;
+      color: var(--success);
+      font-size: 0.95em;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .next-topic {
+      background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+      border-left: 4px solid var(--info);
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
+    }
+
+    .next-topic-title {
+      font-weight: 700;
+      color: var(--info);
+      margin-bottom: 8px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔬 Lab Continuidad Pro v2.0</h1>
+      <p>Herramienta interactiva profesional con explicaciones paso a paso</p>
+    </header>
+
+    <div class="tabs-container">
+      <button class="tab-btn active" onclick="switchTab('laboratory')">🔬 Laboratorio</button>
+      <button class="tab-btn" onclick="switchTab('finance')">💰 Finanzas</button>
+      <button class="tab-btn" onclick="switchTab('multimedia')">🎬 Multimedia</button>
+    </div>
+
+    <!-- ============ LABORATORIO ============ -->
+    <div id="laboratory" class="tab-content active">
+      <div class="card">
+        <h2>
+          📊 Selector de Función
+          <div class="help-icon" onclick="openGlossary('funcion')" title="¿Qué es una función?">?</div>
+        </h2>
+        
+        <div class="control-group">
+          <label>Elige una función predefinida:</label>
+          <select id="functionSelect" onchange="loadPredefinedFunction()">
+            <option value="">-- Selecciona una función --</option>
+            <option value="x^2">f(x) = x² (continua)</option>
+            <option value="1/x">f(x) = 1/x (discontinua en x=0)</option>
+            <option value="(x^2-1)/(x-1)">(x²-1)/(x-1) (agujero en x=1)</option>
+            <option value="abs(x)">f(x) = |x| (continua)</option>
+            <option value="sin(x)">f(x) = sin(x) (continua)</option>
+            <option value="piecewise">f(x) = {x si x<2; 5 si x≥2} (salto)</option>
+            <option value="sqrt(x)">f(x) = √x (dominio limitado)</option>
+            <option value="exp(x)">f(x) = e^x (continua)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>
+            O ingresa tu propia función:
+            <div class="help-icon" onclick="openGlossary('notacion')">?</div>
+          </label>
+          <input type="text" id="customFunction" placeholder="Ej: x^2 + 3*x - 5" onchange="loadCustomFunction()" onkeyup="validateFunctionInReal()">
+          <div id="functionError"></div>
+        </div>
+
+        <div class="formula" id="formulaDisplay">f(x) = </div>
+
+        <div class="control-group">
+          <label>Rango X: <span class="slider-value" id="xRangeDisplay">-5 a 5</span></label>
+          <input type="range" id="xRange" min="1" max="15" value="5" onchange="updateGraphics()">
+        </div>
+
+        <div class="control-group">
+          <label>
+            Punto de análisis (a): <span class="slider-value" id="pointDisplay">0</span>
+            <div class="help-icon" onclick="openGlossary('punto_analisis')">?</div>
+          </label>
+          <input type="range" id="analysisPoint" min="-10" max="10" step="0.1" value="0" onchange="updateGraphics()">
+        </div>
+      </div>
+
+      <!-- GRÁFICA -->
+      <div class="card full-width" style="margin-top: 20px;">
+        <h2>📈 Gráfica Interactiva</h2>
+        <div class="chart-container">
+          <canvas id="mainChart"></canvas>
+        </div>
+      </div>
+
+      <!-- ANÁLISIS -->
+      <div class="grid-2" style="margin-top: 20px;">
+        <div class="card">
+          <h2>✅ Análisis de Continuidad</h2>
+          <div class="continuity-check" id="continuityCheck">
+            <p style="text-align: center; color: #999; padding: 20px;">Selecciona una función para comenzar</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>💡 Análisis Detallado</h2>
+          <div id="detailedAnalysis">
+            <p style="text-align: center; color: #999;">El análisis aparecerá aquí</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTONES DE AYUDA -->
+      <div class="card full-width" style="margin-top: 20px;">
+        <h2>📚 Centro de Ayuda</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <button onclick="openComparison()" style="margin: 0;">⭕ Agujero vs ⛑️ Salto</button>
+          <button onclick="openLimitAnimation()" style="margin: 0;">👈 Límites Laterales 👉</button>
+          <button onclick="openZeroZeroExplainer()" style="margin: 0;">🤔 ¿Por qué 0/0?</button>
+          <button onclick="openNextTopics()" style="margin: 0;">📚 Próximos Pasos</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ FINANZAS ============ -->
+    <div id="finance" class="tab-content">
+      <div class="card full-width">
+        <h2>💰 Ejemplos: Finanzas</h2>
+        <p style="margin-bottom: 20px;">Explora cómo continuidad aparece en finanzas reales.</p>
+
+        <h3 style="color: var(--primary); margin-top: 25px;">📈 Tasa de Cambio con Crisis</h3>
+        <div style="background: var(--light); padding: 15px; border-radius: 8px; margin: 15px 0;">
+          <strong>Escenario:</strong> Evento de mercado causa salto de $3,900 a $3,750<br>
+          <strong>Función:</strong> <code>f(t) = {3900 si t<2; 3750 si t≥2}</code>
+        </div>
+        <button onclick="loadExample('finance1')">Analizar en Lab →</button>
+
+        <h3 style="color: var(--primary); margin-top: 25px;">💳 Función de Riesgo de Crédito</h3>
+        <div style="background: var(--light); padding: 15px; border-radius: 8px; margin: 15px 0;">
+          <strong>Escenario:</strong> Agujero en la función de riesgo<br>
+          <strong>Función:</strong> <code>f(x) = (x²-100)/(x-10)</code>
+        </div>
+        <button onclick="loadExample('finance2')">Analizar en Lab →</button>
+      </div>
+    </div>
+
+    <!-- ============ MULTIMEDIA ============ -->
+    <div id="multimedia" class="tab-content">
+      <div class="card full-width">
+        <h2>🎬 Ejemplos: Multimedia</h2>
+        <p style="margin-bottom: 20px;">Descubre cómo continuidad afecta calidad visual.</p>
+
+        <h3 style="color: var(--primary); margin-top: 25px;">🎥 Transición de Video</h3>
+        <div style="background: var(--light); padding: 15px; border-radius: 8px; margin: 15px 0;">
+          <strong>Escenario:</strong> Fade suave vs corte abrupto<br>
+          <strong>Función:</strong> <code>f(t) = 100 - (100/30)*t</code>
+        </div>
+        <button onclick="loadExample('multimedia1')">Analizar en Lab →</button>
+
+        <h3 style="color: var(--primary); margin-top: 25px;">💾 Compresión de Datos</h3>
+        <div style="background: var(--light); padding: 15px; border-radius: 8px; margin: 15px 0;">
+          <strong>Escenario:</strong> Agujero en función de compresión<br>
+          <strong>Función:</strong> <code>f(q) = (q³-1000)/(q-10)</code>
+        </div>
+        <button onclick="loadExample('multimedia2')">Analizar en Lab →</button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ============ MODALES ============ -->
+
+  <!-- TUTORIAL OBLIGATORIO -->
+  <div id="tutorialModal" class="modal active">
+    <div class="modal-content">
+      <div class="modal-header">
+        🎓 Tutorial Obligatorio (5 minutos)
+        <span></span>
+      </div>
+      <div class="modal-body" id="tutorialContent"></div>
+      <div class="tutorial-buttons">
+        <button id="prevBtn" onclick="prevTutorialStep()" style="width: auto; margin: 0;">← Anterior</button>
+        <button id="nextBtn" onclick="nextTutorialStep()" style="width: auto; margin: 0;">Siguiente →</button>
+      </div>
+      <div class="tutorial-step-counter" id="tutorialCounter"></div>
+    </div>
+  </div>
+
+  <!-- GLOSARIO -->
+  <div id="glossaryModal" class="modal" onclick="closeGlossary(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        📖 Glosario Interactivo
+        <span class="close-modal" onclick="closeGlossary()">×</span>
+      </div>
+      <div class="modal-body" id="glossaryContent"></div>
+    </div>
+  </div>
+
+  <!-- COMPARATIVA AGUJERO VS SALTO -->
+  <div id="comparisonModal" class="modal" onclick="closeComparison(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        ⭕ Agujero vs ⛑️ Salto
+        <span class="close-modal" onclick="closeComparison()">×</span>
+      </div>
+      <div class="modal-body" id="comparisonContent"></div>
+    </div>
+  </div>
+
+  <!-- LÍMITES LATERALES -->
+  <div id="limitAnimationModal" class="modal" onclick="closeLimitAnimation(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        👈 Entendiendo Límites Laterales 👉
+        <span class="close-modal" onclick="closeLimitAnimation()">×</span>
+      </div>
+      <div class="modal-body" id="limitAnimationContent"></div>
+    </div>
+  </div>
+
+  <!-- 0/0 EXPLICADOR -->
+  <div id="zeroZeroModal" class="modal" onclick="closeZeroZero(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        🤔 ¿Por qué 0/0 es indefinido?
+        <span class="close-modal" onclick="closeZeroZero()">×</span>
+      </div>
+      <div class="modal-body" id="zeroZeroContent"></div>
+    </div>
+  </div>
+
+  <!-- PRÓXIMOS PASOS -->
+  <div id="nextStepsModal" class="modal" onclick="closeNextSteps(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        📚 ¿Qué viene después?
+        <span class="close-modal" onclick="closeNextSteps()">×</span>
+      </div>
+      <div class="modal-body" id="nextStepsContent"></div>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    // ============ VARIABLES ============
+    let currentFunction = '';
+    let currentFunctionStr = '';
+    let analysisPoint = 0;
+    let xRange = 5;
+    let mainChart = null;
+    let tutorialStep = 0;
+    let animationRunning = true;
+
+    // ============ TUTORIAL OBLIGATORIO ============
+    const tutorialSteps = [
+      {
+        title: "Bienvenido a Lab Continuidad Pro",
+        content: `
+          <p style="margin-bottom: 15px;">
+            Esta herramienta te ayudará a <strong>dominar continuidad de funciones</strong> con interactividad total.
+          </p>
+          <p style="margin-bottom: 15px;"><strong>En este tutorial (5 minutos) aprenderás:</strong></p>
+          <ul style="margin-left: 20px; margin-bottom: 15px;">
+            <li>✅ Las 3 condiciones de continuidad</li>
+            <li>✅ Cómo usar la herramienta</li>
+            <li>✅ Diferencia entre agujero y salto</li>
+            <li>✅ Cómo leer la gráfica</li>
+            <li>✅ Dónde pedir ayuda</li>
+          </ul>
+          <p style="padding: 15px; background: var(--light); border-radius: 6px;">
+            <strong>💡 Tip:</strong> Puedes pausar en cualquier momento y explorar la herramienta.
+          </p>
+        `
+      },
+      {
+        title: "Las 3 Condiciones de Continuidad",
+        content: `
+          <p style="margin-bottom: 15px;">
+            Una función <strong>es continua en x=a</strong> cuando se cumplen <strong>LAS 3</strong> condiciones:
+          </p>
+          
+          <div class="step">
+            <span class="step-number">1</span>
+            <strong>f(a) existe</strong><br>
+            La función está definida. Puedes sustituir x=a y obtener un número real.
+          </div>
+
+          <div class="step">
+            <span class="step-number">2</span>
+            <strong>El límite existe</strong><br>
+            Los límites desde izquierda y derecha son iguales: lim(x→a⁻) = lim(x→a⁺)
+          </div>
+
+          <div class="step">
+            <span class="step-number">3</span>
+            <strong>Coinciden</strong><br>
+            El valor de la función = el límite: f(a) = lim(x→a) f(x)
+          </div>
+
+          <div style="padding: 15px; background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); border-radius: 6px; margin-top: 15px; border-left: 4px solid var(--success);">
+            <strong style="color: var(--success);">✓ REGLA DE ORO:</strong> Si se cumplen las 3 → CONTINUA. Si falta 1 → DISCONTINUA
+          </div>
+        `
+      },
+      {
+        title: "¿Qué son los Límites Laterales?",
+        content: `
+          <p style="margin-bottom: 20px;">
+            Los límites tienen <strong>dos direcciones</strong>. Imagina que te acercas al punto 'a' desde dos caminos:
+          </p>
+
+          <div class="animation-container">
+            <div class="animation-stage">
+              <div class="animation-arrow left" style="animation-play-state: running;">👈</div>
+              <div class="animation-point">📍</div>
+              <div class="animation-arrow right" style="animation-play-state: running;">👉</div>
+            </div>
+          </div>
+
+          <p style="margin-top: 20px; text-align: center;">
+            <strong>Desde la izquierda:</strong> lim(x→a⁻) f(x)<br>
+            <strong>Desde la derecha:</strong> lim(x→a⁺) f(x)
+          </p>
+
+          <div style="padding: 15px; background: var(--light); border-radius: 6px; margin-top: 15px;">
+            <strong>Si ambos llegan al MISMO valor → El límite existe ✓</strong><br>
+            <strong>Si llegan a VALORES DIFERENTES → El límite NO existe ✗</strong>
+          </div>
+
+          <div class="animation-controls">
+            <button class="animation-btn" id="pausePlayBtn" onclick="toggleAnimationPause()">⏸ Pausar Animación</button>
+          </div>
+        `
+      },
+      {
+        title: "Agujero vs Salto - Diferencias",
+        content: `
+          <p style="margin-bottom: 20px;">Hay dos tipos principales de discontinuidad:</p>
+          
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <div class="comparison-title">⭕ AGUJERO (Removible)</div>
+              <div class="comparison-item">
+                <strong>Qué falla:</strong> Condición 1 o 3
+              </div>
+              <div class="comparison-item">
+                <strong>En gráfica:</strong> Punto 🔴 rojo
+              </div>
+              <div class="comparison-item">
+                <strong>El límite:</strong> ✓ Existe
+              </div>
+              <div class="comparison-item">
+                <strong>Se repara:</strong> ✓ Redefiniendo f(a)
+              </div>
+            </div>
+
+            <div class="comparison-card jump">
+              <div class="comparison-title">⛑️ SALTO (No-removible)</div>
+              <div class="comparison-item">
+                <strong>Qué falla:</strong> Condición 2
+              </div>
+              <div class="comparison-item">
+                <strong>En gráfica:</strong> Brecha vertical
+              </div>
+              <div class="comparison-item">
+                <strong>El límite:</strong> ✗ NO existe
+              </div>
+              <div class="comparison-item">
+                <strong>Se repara:</strong> ✗ Nunca
+              </div>
+            </div>
+          </div>
+
+          <button onclick="openComparison()" style="margin-top: 15px; width: 100%;">Ver comparativa detallada →</button>
+        `
+      },
+      {
+        title: "Cómo Usar la Herramienta",
+        content: `
+          <p style="margin-bottom: 15px;"><strong>PASO 1:</strong> Selecciona una función (o escribe tu propia)</p>
+          <p style="margin-bottom: 15px;"><strong>PASO 2:</strong> Mueve el deslizador "Punto de análisis"</p>
+          <p style="margin-bottom: 15px;"><strong>PASO 3:</strong> La herramienta analiza automáticamente:</p>
+          <ul style="margin-left: 20px; margin-bottom: 15px;">
+            <li>¿f(a) existe?</li>
+            <li>¿El límite existe?</li>
+            <li>¿Coinciden?</li>
+          </ul>
+          <p style="margin-bottom: 15px;"><strong>PASO 4:</strong> Lee el resultado</p>
+
+          <div style="padding: 15px; background: var(--light); border-radius: 6px; margin-top: 15px;">
+            <strong>📊 Recuerda:</strong><br>
+            🟢 Punto verde = función definida<br>
+            🔴 Punto rojo = agujero (no definida)
+          </div>
+        `
+      },
+      {
+        title: "Pide Ayuda Cuando La Necesites",
+        content: `
+          <p style="margin-bottom: 20px;">En toda la herramienta verás este icono:</p>
+          <p style="text-align: center; margin-bottom: 20px;">
+            <span class="help-icon" style="transform: scale(2);">?</span>
+          </p>
+          <p style="margin-bottom: 15px;"><strong>Haz clic para ver:</strong></p>
+          <ul style="margin-left: 20px; margin-bottom: 20px;">
+            <li>✅ Definiciones de términos</li>
+            <li>✅ Ejemplos claros</li>
+            <li>✅ Explicaciones paso a paso</li>
+            <li>✅ Animaciones interactivas</li>
+          </ul>
+
+          <div style="padding: 15px; background: var(--light); border-radius: 6px;">
+            <strong>En el Laboratorio también hay botones:</strong><br>
+            ⭕ Agujero vs Salto<br>
+            👈 Límites Laterales<br>
+            🤔 ¿Por qué 0/0?<br>
+            📚 Próximos Pasos
+          </div>
+        `
+      },
+      {
+        title: "¡Estás Listo para Comenzar!",
+        content: `
+          <p style="margin-bottom: 20px; font-size: 1.15em; text-align: center;">
+            <strong>✅ Completaste el tutorial</strong>
+          </p>
+
+          <p style="margin-bottom: 15px;">Ahora puedes:</p>
+          <ul style="margin-left: 20px; margin-bottom: 20px;">
+            <li>✅ Explorar funciones en el Laboratorio</li>
+            <li>✅ Entender por qué una función es continua o no</li>
+            <li>✅ Ver ejemplos en Finanzas y Multimedia</li>
+            <li>✅ Prepararte para Derivadas e Integrales</li>
+          </ul>
+
+          <div style="padding: 20px; background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); border-radius: 6px; border-left: 4px solid var(--success); text-align: center;">
+            <strong style="color: var(--success); font-size: 1.15em;">¡Bienvenido a Lab Continuidad Pro! 🚀</strong><br>
+            <small style="display: block; margin-top: 10px;">Haz clic en "Siguiente" para cerrar el tutorial y comenzar</small>
+          </div>
+        `
+      }
+    ];
+
+    function displayTutorialStep() {
+      const step = tutorialSteps[tutorialStep];
+      const content = document.getElementById('tutorialContent');
+      content.innerHTML = `
+        <h3 style="margin-bottom: 15px;">${step.title}</h3>
+        <div style="font-size: 0.95em; color: var(--dark); line-height: 1.8;">
+          ${step.content}
+        </div>
+      `;
+
+      document.getElementById('prevBtn').disabled = tutorialStep === 0;
+      document.getElementById('nextBtn').textContent = tutorialStep === tutorialSteps.length - 1 ? 'Cerrar ✓' : 'Siguiente →';
+      document.getElementById('tutorialCounter').textContent = `Paso ${tutorialStep + 1} de ${tutorialSteps.length}`;
+    }
+
+    function nextTutorialStep() {
+      if (tutorialStep < tutorialSteps.length - 1) {
+        tutorialStep++;
+        displayTutorialStep();
+      } else {
+        closeTutorial();
+      }
+    }
+
+    function prevTutorialStep() {
+      if (tutorialStep > 0) {
+        tutorialStep--;
+        displayTutorialStep();
+      }
+    }
+
+    function closeTutorial() {
+      document.getElementById('tutorialModal').classList.remove('active');
+    }
+
+    // ============ GLOSARIO ============
+    const glossary = {
+      'funcion': {
+        term: 'Función f(x)',
+        definition: 'Una relación matemática que asigna a cada valor de x un único valor de f(x). Es como una máquina: entra x, sale f(x).',
+        example: 'f(x) = x² significa: si entra x=2, sale f(2)=4'
+      },
+      'notacion': {
+        term: 'Notación Matemática',
+        definition: 'Forma estándar de escribir expresiones matemáticas en computadora.',
+        example: 'x^2 (x cuadrado), sin(x), sqrt(x), abs(x), 1/x, exp(x)'
+      },
+      'punto_analisis': {
+        term: 'Punto de Análisis (a)',
+        definition: 'El punto específico donde verificamos si la función es continua. Es donde investigamos si se cumplen las 3 condiciones.',
+        example: 'Si analizamos en x=2, verificamos: ¿f(2) existe? ¿el límite en 2 existe? ¿coinciden?'
+      },
+      'limite': {
+        term: 'Límite lim(x→a) f(x)',
+        definition: 'El valor al que se acerca f(x) cuando x se acerca a a. No importa si x llega a a, importa hacia dónde va.',
+        example: 'lim(x→2) x² = 4 (sin que x sea exactamente 2)'
+      },
+      'limite_izq': {
+        term: 'Límite Izquierdo lim(x→a⁻)',
+        definition: 'El valor al que se acerca f(x) cuando te aproximas a a DESDE LA IZQUIERDA en la recta numérica.',
+        example: 'En f(x)=1/x, lim(x→0⁻) = -∞ (desde la izquierda va a menos infinito)'
+      },
+      'limite_der': {
+        term: 'Límite Derecho lim(x→a⁺)',
+        definition: 'El valor al que se acerca f(x) cuando te aproximas a a DESDE LA DERECHA en la recta numérica.',
+        example: 'En f(x)=1/x, lim(x→0⁺) = +∞ (desde la derecha va a más infinito)'
+      },
+      'continua': {
+        term: 'Función Continua',
+        definition: 'Una función donde se cumplen LAS 3 condiciones. Visualmente, puedes dibujarla sin levantar el lápiz.',
+        example: 'f(x) = x² es continua en todos lados. Puedes dibujarla de un trazo.'
+      },
+      'agujero': {
+        term: 'Agujero (Discontinuidad Removible)',
+        definition: 'Falta la función en un punto, pero el límite existe. Es como un punto faltante en la gráfica que podrías "reparar".',
+        example: 'f(x) = (x²-1)/(x-1) en x=1 tiene un agujero (punto rojo en la gráfica)'
+      },
+      'salto': {
+        term: 'Salto (Discontinuidad No-Removible)',
+        definition: 'Los límites laterales son diferentes. La función literalmente "salta" de un valor a otro. No se puede reparar.',
+        example: 'f(x) = {0 si x<0; 1 si x≥0} salta de 0 a 1 en x=0'
+      },
+      'indefinido': {
+        term: '0/0 - Indefinido',
+        definition: 'Cuando al sustituir x en una fracción obtienes 0 en el numerador Y 0 en el denominador, el resultado NO ESTÁ DEFINIDO matemáticamente.',
+        example: 'f(x)=(x²-1)/(x-1) en x=1 → (0)/(0) = indefinido ✗'
+      }
+    };
+
+    function openGlossary(term) {
+      const modal = document.getElementById('glossaryModal');
+      const content = document.getElementById('glossaryContent');
+      
+      if (glossary[term]) {
+        const item = glossary[term];
+        content.innerHTML = `
+          <div class="glossary-item" style="border: none; cursor: auto;">
+            <div class="glossary-term" style="font-size: 1.1em;">${item.term}</div>
+            <div class="glossary-definition"><strong>Definición:</strong><br>${item.definition}</div>
+            <div class="glossary-example"><strong>Ejemplo:</strong><br>${item.example}</div>
+          </div>
+          
+          <h3 style="margin-top: 30px; margin-bottom: 15px;">Otros Términos Útiles:</h3>
+          ${Object.keys(glossary).map(key => `
+            <div class="glossary-item" onclick="updateGlossaryItem('${key}')">
+              <div class="glossary-term">${glossary[key].term}</div>
+            </div>
+          `).join('')}
+        `;
+      }
+      
+      modal.classList.add('active');
+    }
+
+    function updateGlossaryItem(term) {
+      const item = glossary[term];
+      const content = document.getElementById('glossaryContent');
+      content.innerHTML = `
+        <div class="glossary-item" style="border: none; cursor: auto;">
+          <div class="glossary-term" style="font-size: 1.1em;">${item.term}</div>
+          <div class="glossary-definition"><strong>Definición:</strong><br>${item.definition}</div>
+          <div class="glossary-example"><strong>Ejemplo:</strong><br>${item.example}</div>
+        </div>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px;">Otros Términos Útiles:</h3>
+        ${Object.keys(glossary).map(key => `
+          <div class="glossary-item" onclick="updateGlossaryItem('${key}')">
+            <div class="glossary-term">${glossary[key].term}</div>
+          </div>
+        `).join('')}
+      `;
+    }
+
+    function closeGlossary(event) {
+      if (!event || event.target.id === 'glossaryModal') {
+        document.getElementById('glossaryModal').classList.remove('active');
+      }
+    }
+
+    // ============ COMPARATIVA AGUJERO VS SALTO ============
+    function openComparison() {
+      const modal = document.getElementById('comparisonModal');
+      const content = document.getElementById('comparisonContent');
+      
+      content.innerHTML = `
+        <div class="comparison-grid">
+          <div class="comparison-card">
+            <div class="comparison-title">⭕ AGUJERO (Removible)</div>
+            
+            <div class="comparison-item">
+              <strong>Qué es:</strong> Un punto que falta en la función
+            </div>
+
+            <div class="comparison-item">
+              <strong>Qué condición falla:</strong> Condición 1 O Condición 3
+            </div>
+
+            <div class="comparison-item">
+              <strong>En la gráfica:</strong> Ves un punto 🔴 rojo (el agujero)
+            </div>
+
+            <div class="comparison-item">
+              <strong>¿Existe el límite?:</strong> ✓ SÍ, existe y es único
+            </div>
+
+            <div class="comparison-item">
+              <strong>¿Se puede reparar?:</strong> ✓ SÍ - Redefiniendo f(a) = límite
+            </div>
+
+            <div style="padding: 12px; background: var(--light); border-radius: 6px; margin-top: 12px;">
+              <strong>Ejemplo:</strong><br>
+              f(x) = (x²-1)/(x-1)<br>
+              En x=1:<br>
+              • f(1) no existe<br>
+              • lim = 2<br>
+              • = AGUJERO ⭕
+            </div>
+          </div>
+
+          <div class="comparison-card jump">
+            <div class="comparison-title">⛑️ SALTO (No-removible)</div>
+            
+            <div class="comparison-item">
+              <strong>Qué es:</strong> Un cambio abrupto en los valores
+            </div>
+
+            <div class="comparison-item">
+              <strong>Qué condición falla:</strong> Condición 2 (los límites son diferentes)
+            </div>
+
+            <div class="comparison-item">
+              <strong>En la gráfica:</strong> Ves una brecha vertical clara
+            </div>
+
+            <div class="comparison-item">
+              <strong>¿Existe el límite?:</strong> ✗ NO existe (izq ≠ derech)
+            </div>
+
+            <div class="comparison-item">
+              <strong>¿Se puede reparar?:</strong> ✗ NO - Es permanente
+            </div>
+
+            <div style="padding: 12px; background: var(--light); border-radius: 6px; margin-top: 12px;">
+              <strong>Ejemplo:</strong><br>
+              f(x) = {0 si x<2; 5 si x≥2}<br>
+              En x=2:<br>
+              • lim izq = 0<br>
+              • lim der = 5<br>
+              • = SALTO ⛑️
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 20px; background: linear-gradient(135deg, #F0F8FF 0%, #E8F4F8 100%); border-radius: 8px; margin-top: 20px; border-left: 4px solid var(--primary);">
+          <strong style="color: var(--primary);">📌 Resumen Rápido:</strong><br>
+          <ul style="margin-left: 20px; margin-top: 10px;">
+            <li><strong>Falta condición 1 o 3:</strong> AGUJERO ⭕ (punto rojo)</li>
+            <li><strong>Falta condición 2:</strong> SALTO ⛑️ (brecha)</li>
+          </ul>
+        </div>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function closeComparison(event) {
+      if (!event || event.target.id === 'comparisonModal') {
+        document.getElementById('comparisonModal').classList.remove('active');
+      }
+    }
+
+    // ============ LÍMITES LATERALES ============
+    function openLimitAnimation() {
+      const modal = document.getElementById('limitAnimationModal');
+      const content = document.getElementById('limitAnimationContent');
+      
+      content.innerHTML = `
+        <p style="margin-bottom: 20px;">
+          Los límites laterales son como dos personas que se acercan a un punto desde direcciones opuestas.
+        </p>
+
+        <div class="animation-container">
+          <p style="margin-bottom: 15px; font-weight: 600;">Observa cómo se acercan:</p>
+          <div class="animation-stage">
+            <div class="animation-arrow left">👈</div>
+            <div class="animation-point">📍</div>
+            <div class="animation-arrow right">👉</div>
+          </div>
+        </div>
+
+        <p style="margin-top: 25px; text-align: center; font-size: 1.05em;">
+          <strong>lim(x→a⁻) = ?</strong> | <strong>Punto a</strong> | <strong>lim(x→a⁺) = ?</strong>
+        </p>
+
+        <div style="margin-top: 20px; padding: 15px; background: var(--light); border-radius: 6px;">
+          <p><strong>Si ambos llegan al MISMO VALOR:</strong></p>
+          <p style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px; text-align: center; color: var(--success);">
+            lim(x→a⁻) = lim(x→a⁺) → El límite EXISTE ✓
+          </p>
+        </div>
+
+        <div style="margin-top: 15px; padding: 15px; background: var(--light); border-radius: 6px;">
+          <p><strong>Si llegan a VALORES DIFERENTES:</strong></p>
+          <p style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px; text-align: center; color: var(--danger);">
+            lim(x→a⁻) ≠ lim(x→a⁺) → El límite NO EXISTE ✗
+          </p>
+        </div>
+
+        <div class="animation-controls" style="margin-top: 25px;">
+          <button class="animation-btn" id="limitPauseBtn" onclick="toggleLimitAnimation()" style="margin: 0;">⏸ Pausar Animación</button>
+          <button class="animation-btn" onclick="closeLimitAnimation()" style="margin: 0; background: var(--secondary);">Entendido ✓</button>
+        </div>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function closeLimitAnimation(event) {
+      if (!event || event.target.id === 'limitAnimationModal') {
+        document.getElementById('limitAnimationModal').classList.remove('active');
+      }
+    }
+
+    function toggleLimitAnimation() {
+      const btn = document.getElementById('limitPauseBtn');
+      animationRunning = !animationRunning;
+      
+      const arrows = document.querySelectorAll('#limitAnimationModal .animation-arrow');
+      arrows.forEach(arrow => {
+        arrow.style.animationPlayState = animationRunning ? 'running' : 'paused';
+      });
+      
+      btn.textContent = animationRunning ? '⏸ Pausar Animación' : '▶ Reproducir Animación';
+      btn.classList.toggle('paused');
+    }
+
+    // ============ 0/0 EXPLICADOR ============
+    function openZeroZeroExplainer() {
+      const modal = document.getElementById('zeroZeroModal');
+      const content = document.getElementById('zeroZeroContent');
+      
+      content.innerHTML = `
+        <p style="margin-bottom: 20px;">
+          Cuando sustituyes x en una función y obtienes 0/0, significa que el resultado está <strong>indefinido</strong>.
+        </p>
+
+        <h3>Ejemplo Paso a Paso</h3>
+        <p style="margin-bottom: 15px;"><strong>f(x) = (x² - 1)/(x - 1) en x = 1</strong></p>
+
+        <div class="substitution-steps">
+          <div class="step">
+            <span class="step-number">1</span>
+            <strong>Identifica dónde analizas:</strong> x = 1
+          </div>
+
+          <div class="step">
+            <span class="step-number">2</span>
+            <strong>Sustituye x = 1 en la función:</strong><br>
+            (1² - 1)/(1 - 1)
+          </div>
+
+          <div class="step">
+            <span class="step-number">3</span>
+            <strong>Resuelve el numerador:</strong><br>
+            1² - 1 = 1 - 1 = <span style="background: #ffe8e8; padding: 2px 6px; border-radius: 3px;"><strong>0</strong></span>
+          </div>
+
+          <div class="step">
+            <span class="step-number">4</span>
+            <strong>Resuelve el denominador:</strong><br>
+            1 - 1 = <span style="background: #ffe8e8; padding: 2px 6px; border-radius: 3px;"><strong>0</strong></span>
+          </div>
+
+          <div class="step">
+            <span class="step-number">5</span>
+            <strong>Resultado:</strong><br>
+            <span style="background: #ffcdd2; padding: 6px 12px; border-radius: 4px; color: var(--danger); font-weight: 600;">
+              0/0 ← INDEFINIDO ✗
+            </span>
+          </div>
+        </div>
+
+        <div style="padding: 20px; background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%); border-radius: 8px; margin-top: 20px; border-left: 4px solid var(--danger);">
+          <strong style="color: var(--danger);">¿Por qué es indefinido?</strong><br>
+          <p style="margin-top: 8px; font-size: 0.95em;">
+            Porque 0/0 no tiene un valor único definido. ¿Cuánto es 0÷0? ¿1? ¿0? ¿∞?<br>
+            No se puede responder, por eso es <strong>indefinido</strong>.
+          </p>
+        </div>
+
+        <div style="padding: 15px; background: var(--light); border-radius: 6px; margin-top: 15px;">
+          <strong style="color: var(--secondary);">Conclusión:</strong> Si al sustituir x=1 obtienes 0/0, entonces <strong>f(1) NO EXISTE</strong>.
+        </div>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function closeZeroZero(event) {
+      if (!event || event.target.id === 'zeroZeroModal') {
+        document.getElementById('zeroZeroModal').classList.remove('active');
+      }
+    }
+
+    // ============ PRÓXIMOS PASOS ============
+    function openNextTopics() {
+      const modal = document.getElementById('nextStepsModal');
+      const content = document.getElementById('nextStepsContent');
+      
+      content.innerHTML = `
+        <p style="margin-bottom: 20px;">
+          Ahora que dominas <strong>continuidad</strong>, estás listo para los próximos temas. ¿Por qué aprendimos continuidad?
+        </p>
+
+        <h3>📈 Derivadas</h3>
+        <div style="padding: 15px; background: var(--light); border-radius: 6px; margin-bottom: 15px;">
+          <p><strong>La derivada mide la "pendiente" de una función en un punto.</strong></p>
+          <p style="margin-top: 8px;">
+            <strong>Requisito:</strong> La función DEBE ser continua. Si hay un salto o agujero, no hay derivada en ese punto.
+          </p>
+          <p style="margin-top: 8px; color: var(--secondary);">
+            Conexión: Antes de preguntar "¿cuál es la pendiente en x=a?", debes verificar si la función es continua en a.
+          </p>
+        </div>
+
+        <h3>∫ Integrales</h3>
+        <div style="padding: 15px; background: var(--light); border-radius: 6px; margin-bottom: 15px;">
+          <p><strong>La integral calcula el área bajo una curva.</strong></p>
+          <p style="margin-top: 8px;">
+            <strong>Requisito:</strong> La función DEBE ser continua en el intervalo. Las discontinuidades complican (o impiden) el cálculo.
+          </p>
+          <p style="margin-top: 8px; color: var(--secondary);">
+            Conexión: Si la función tiene saltos, el área se vuelve complicada de calcular.
+          </p>
+        </div>
+
+        <h3>Teoremas Importantes</h3>
+        <div style="padding: 15px; background: var(--light); border-radius: 6px; margin-bottom: 15px;">
+          <p><strong>Teorema del Valor Intermedio (TVI):</strong></p>
+          <p style="margin-top: 8px;">
+            Si f es continua en [a,b], entonces toma todos los valores entre f(a) y f(b).
+          </p>
+          <p style="margin-top: 8px; color: var(--secondary);">
+            <strong>¿Por qué?</strong> Porque sin saltos, la función tiene que pasar por todos los valores intermedios.
+          </p>
+        </div>
+
+        <h3>Continuidad en tu Carrera</h3>
+        <div style="padding: 15px; background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); border-radius: 6px; border-left: 4px solid var(--success);">
+          <p><strong style="color: var(--success);">💰 Finanzas:</strong> Detectar discontinuidades = detectar riesgos y puntos de quiebre</p>
+          <p style="margin-top: 8px;"><strong style="color: var(--success);">🎬 Multimedia:</strong> Continuidad = calidad visual suave sin artefactos</p>
+        </div>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function closeNextSteps(event) {
+      if (!event || event.target.id === 'nextStepsModal') {
+        document.getElementById('nextStepsModal').classList.remove('active');
+      }
+    }
+
+    // ============ FUNCIONES MATEMÁTICAS ============
+    const predefinedFunctions = {
+      'x^2': { expr: 'x^2', name: 'f(x) = x²' },
+      '1/x': { expr: '1/x', name: 'f(x) = 1/x' },
+      '(x^2-1)/(x-1)': { expr: '(x^2-1)/(x-1)', name: 'f(x) = (x²-1)/(x-1)' },
+      'abs(x)': { expr: 'abs(x)', name: 'f(x) = |x|' },
+      'sin(x)': { expr: 'sin(x)', name: 'f(x) = sin(x)' },
+      'piecewise': { expr: 'piecewise', name: 'f(x) = {x si x<2; 5 si x≥2}' },
+      'sqrt(x)': { expr: 'sqrt(x)', name: 'f(x) = √x' },
+      'exp(x)': { expr: 'exp(x)', name: 'f(x) = eˣ' }
+    };
+
+    function evaluateFunction(x) {
+      try {
+        let expr = currentFunctionStr;
+        
+        if (expr === '1/x' && x === 0) return null;
+        if (expr === 'piecewise') return x < 2 ? x : 5;
+        if (expr === 'sqrt(x)' && x < 0) return null;
+        if (expr === '(x^2-1)/(x-1)' && x === 1) return null;
+        
+        return math.evaluate(expr, { x });
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      setTimeout(() => {
+        if (mainChart) mainChart.resize();
+      }, 100);
+    }
+
+    function loadPredefinedFunction() {
+      const select = document.getElementById('functionSelect');
+      const value = select.value;
+      
+      if (!value) return;
+      
+      currentFunction = value;
+      currentFunctionStr = predefinedFunctions[value].expr;
+      document.getElementById('customFunction').value = '';
+      document.getElementById('functionError').innerHTML = '';
+      document.getElementById('formulaDisplay').textContent = 'f(x) = ' + predefinedFunctions[value].name;
+      
+      updateGraphics();
+    }
+
+    function loadCustomFunction() {
+      const customInput = document.getElementById('customFunction').value;
+      if (!customInput) return;
+      
+      try {
+        math.evaluate(customInput, { x: 1 });
+        currentFunction = 'custom';
+        currentFunctionStr = customInput;
+        document.getElementById('functionSelect').value = '';
+        document.getElementById('functionError').innerHTML = '';
+        document.getElementById('formulaDisplay').textContent = 'f(x) = ' + customInput;
+        updateGraphics();
+      } catch (e) {
+        document.getElementById('functionError').innerHTML = `
+          <div class="error-message">
+            ❌ Función inválida: ${e.message}<br>
+            <small style="display: block; margin-top: 6px;">
+              Usa: x^2, sin(x), sqrt(x), abs(x), 1/x, exp(x)<br>
+              Ejemplo: (x^2-1)/(x-1)
+            </small>
+          </div>
+        `;
+      }
+    }
+
+    function validateFunctionInReal() {
+      const customInput = document.getElementById('customFunction').value;
+      if (!customInput) {
+        document.getElementById('functionError').innerHTML = '';
+        return;
+      }
+      
+      try {
+        math.evaluate(customInput, { x: 1 });
+        document.getElementById('functionError').innerHTML = '<div class="success-message">✓ Función válida</div>';
+      } catch (e) {
+        document.getElementById('functionError').innerHTML = `
+          <div class="error-message" style="margin-top: 6px; margin-bottom: 0;">
+            ❌ ${e.message}
+          </div>
+        `;
+      }
+    }
+
+    function updateGraphics() {
+      if (!currentFunctionStr) {
+        document.getElementById('detailedAnalysis').innerHTML = 
+          '<p style="text-align:center; color:#999;">Selecciona una función para comenzar</p>';
+        return;
+      }
+
+      xRange = parseFloat(document.getElementById('xRange').value);
+      analysisPoint = parseFloat(document.getElementById('analysisPoint').value);
+      
+      document.getElementById('xRangeDisplay').textContent = `-${xRange} a ${xRange}`;
+      document.getElementById('pointDisplay').textContent = analysisPoint.toFixed(2);
+      
+      drawChart();
+      analyzeContinuity();
+    }
+
+    function drawChart() {
+      const data = [];
+      const xValues = [];
+      const step = (2 * xRange) / 200;
+      
+      for (let i = 0; i <= 200; i++) {
+        const x = -xRange + (i * step);
+        xValues.push(parseFloat(x.toFixed(2)));
+        const y = evaluateFunction(x);
+        data.push(y !== null ? parseFloat(y.toFixed(4)) : null);
+      }
+
+      const chartData = {
+        labels: xValues,
+        datasets: [
+          {
+            label: 'f(x)',
+            data: xValues.map((x, i) => ({ x, y: data[i] })),
+            borderColor: '#028090',
+            backgroundColor: 'rgba(2, 128, 144, 0.1)',
+            borderWidth: 2.5,
+            fill: true,
+            showLine: true,
+            tension: 0.1,
+            pointRadius: 0,
+            segment: {
+              borderColor: ctx => {
+                if (data[ctx.p0DataIndex] === null || data[ctx.p1DataIndex] === null) {
+                  return 'rgba(200, 200, 200, 0.3)';
+                }
+                return '#028090';
+              }
+            }
+          },
+          {
+            label: `Punto: x = ${analysisPoint.toFixed(2)}`,
+            data: [{ x: analysisPoint, y: evaluateFunction(analysisPoint) }],
+            pointBackgroundColor: evaluateFunction(analysisPoint) !== null ? '#27AE60' : '#E74C3C',
+            pointRadius: 8,
+            showLine: false,
+            pointStyle: 'circle',
+            pointBorderColor: 'white',
+            pointBorderWidth: 2
+          }
+        ]
+      };
+
+      const ctx = document.getElementById('mainChart');
+      if (mainChart) mainChart.destroy();
+      
+      mainChart = new Chart(ctx, {
+        type: 'scatter',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true, position: 'top' } },
+          scales: {
+            x: { type: 'linear', min: -xRange, max: xRange, title: { display: true, text: 'x' } },
+            y: { title: { display: true, text: 'f(x)' } }
+          }
+        }
+      });
+    }
+
+    function analyzeContinuity() {
+      const a = analysisPoint;
+      const f_a = evaluateFunction(a);
+      const limitLeft = evaluateFunction(a - 0.0001);
+      const limitRight = evaluateFunction(a + 0.0001);
+      
+      let continuityHtml = '';
+
+      const cond1 = f_a !== null && !isNaN(f_a) && isFinite(f_a);
+      continuityHtml += `
+        <div class="check-item">
+          <div class="check-icon ${cond1 ? 'yes' : 'no'}">${cond1 ? '✓' : '✗'}</div>
+          <div class="check-label">
+            <strong>f(${a.toFixed(2)}) existe</strong><br>
+            ${cond1 ? `<strong style="color: var(--success);">Valor: ${f_a.toFixed(4)}</strong>` : '<strong style="color: var(--danger);">No está definida</strong>'}
+          </div>
+        </div>
+      `;
+
+      const limitsEqual = limitLeft !== null && limitRight !== null && Math.abs(limitLeft - limitRight) < 0.001;
+      continuityHtml += `
+        <div class="check-item">
+          <div class="check-icon ${limitsEqual ? 'yes' : 'no'}">${limitsEqual ? '✓' : '✗'}</div>
+          <div class="check-label">
+            <strong>El límite existe</strong><br>
+            Izq: ${limitLeft !== null ? limitLeft.toFixed(4) : 'N/A'} | Der: ${limitRight !== null ? limitRight.toFixed(4) : 'N/A'}
+          </div>
+        </div>
+      `;
+
+      let limitValue = null;
+      if (limitLeft !== null && limitRight !== null) {
+        limitValue = (limitLeft + limitRight) / 2;
+      }
+      
+      const cond3 = cond1 && limitValue !== null && Math.abs(f_a - limitValue) < 0.001;
+      continuityHtml += `
+        <div class="check-item">
+          <div class="check-icon ${cond3 ? 'yes' : 'no'}">${cond3 ? '✓' : '✗'}</div>
+          <div class="check-label">
+            <strong>f(a) = límite</strong><br>
+            ${cond1 ? f_a.toFixed(4) : 'N/A'} = ${limitValue !== null ? limitValue.toFixed(4) : 'N/A'}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('continuityCheck').innerHTML = continuityHtml;
+
+      let explanation = '';
+      if (cond1 && limitsEqual && cond3) {
+        explanation = `
+          <div class="success-message" style="padding: 20px; border-radius: 8px;">
+            <strong style="font-size: 1.1em;">✓ FUNCIÓN CONTINUA en x = ${a.toFixed(2)}</strong><br>
+            <small style="display: block; margin-top: 8px;">Las 3 condiciones se cumplen. La función es suave sin saltos ni agujeros.</small>
+          </div>
+        `;
+      } else {
+        if (!cond1 || !cond3) {
+          explanation = `
+            <div class="error-message" style="padding: 20px; border-radius: 8px;">
+              <strong style="font-size: 1.1em;">⭕ AGUJERO (Removible)</strong><br>
+              <small style="display: block; margin-top: 8px;">Falta f(a) o no coincide con el límite.</small>
+            </div>
+          `;
+        } else if (!limitsEqual) {
+          explanation = `
+            <div class="error-message" style="padding: 20px; border-radius: 8px;">
+              <strong style="font-size: 1.1em;">⛑️ SALTO (No-Removible)</strong><br>
+              <small style="display: block; margin-top: 8px;">Los límites laterales son diferentes.</small>
+            </div>
+          `;
+        }
+      }
+
+      document.getElementById('detailedAnalysis').innerHTML = explanation;
+    }
+
+    function loadExample(exampleId) {
+      switchTab('laboratory');
+      
+      const examples = {
+        'finance1': { expr: 'piecewise', name: 'Tasa USD/COP' },
+        'finance2': { expr: '(x^2-100)/(x-10)', name: 'Riesgo Crédito' },
+        'multimedia1': { expr: '(100 - (100/30)*x)', name: 'Fade Video' },
+        'multimedia2': { expr: '(x^3-1000)/(x-10)', name: 'Compresión' }
+      };
+
+      if (examples[exampleId]) {
+        currentFunctionStr = examples[exampleId].expr;
+        currentFunction = exampleId;
+        document.getElementById('functionSelect').value = '';
+        document.getElementById('customFunction').value = '';
+        document.getElementById('formulaDisplay').textContent = 'f(x) = ' + examples[exampleId].name;
+        updateGraphics();
+      }
+    }
+
+    function toggleAnimationPause() {
+      const btn = document.getElementById('pausePlayBtn');
+      animationRunning = !animationRunning;
+      
+      const arrows = document.querySelectorAll('#tutorialModal .animation-arrow');
+      arrows.forEach(arrow => {
+        arrow.style.animationPlayState = animationRunning ? 'running' : 'paused';
+      });
+      
+      btn.textContent = animationRunning ? '⏸ Pausar Animación' : '▶ Reproducir Animación';
+    }
+
+    // Inicializar
+    window.addEventListener('DOMContentLoaded', () => {
+      displayTutorialStep();
+    });
+  </script>
+</body>
+</html>
